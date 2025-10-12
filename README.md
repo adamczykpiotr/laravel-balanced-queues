@@ -1,60 +1,156 @@
-# Laravel package designed to optimize the performance and efficiency of your application's queue usage
+# Laravel Balanced Queues
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/adamczykpiotr/laravel-balanced-queues.svg?style=flat-square)](https://packagist.org/packages/adamczykpiotr/laravel-balanced-queues)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/adamczykpiotr/laravel-balanced-queues/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/adamczykpiotr/laravel-balanced-queues/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/adamczykpiotr/laravel-balanced-queues/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/adamczykpiotr/laravel-balanced-queues/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/adamczykpiotr/laravel-balanced-queues.svg?style=flat-square)](https://packagist.org/packages/adamczykpiotr/laravel-balanced-queues)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+**Stop guessing how many queue workers you need.** This package automatically optimizes worker counts based on job
+type (CPU-intensive, API calls, file downloads) and your server's resources.
 
-## Support us
+## Why You Need This
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-balanced-queues.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-balanced-queues)
+Running 10 workers for everything? **You're wasting resources or creating bottlenecks.**
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+- 🔴 **Image downloads** saturate your network with too many workers
+- 🟡 **API calls** queue up with too few concurrent workers
+- 🟠 **CPU jobs** leave cores idle or cause context-switching overhead
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+Are you running your application on different machines? Different CPU core configurations, changing network bandwidth?
 
-## Installation
+**Wth this package you can optimize it automatically and fine tune it for best results.**
 
-You can install the package via composer:
+## Quick Start
 
 ```bash
 composer require adamczykpiotr/laravel-balanced-queues
-```
-
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="laravel-balanced-queues-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
 php artisan vendor:publish --tag="laravel-balanced-queues-config"
 ```
 
-This is the contents of the published config file:
+Tag your jobs with the right workload type using traits:
 
 ```php
+use AdamczykPiotr\LaravelBalancedQueues\Traits\HasHighNetworkBandwidthUsageQueue;
+use AdamczykPiotr\LaravelBalancedQueues\Traits\HasHighNetworkRequestUsageQueue;
+use AdamczykPiotr\LaravelBalancedQueues\Traits\HasMediumCpuUsageQueue;
+use AdamczykPiotr\LaravelBalancedQueues\Traits\HasHighCpuUsageQueue;
+
+class ScrapeVideosJob implements ShouldQueue
+{
+    use HasHighNetworkBandwidthUsageQueue;
+}
+
+class CallApiJob implements ShouldQueue
+{
+    use HasHighNetworkRequestUsageQueue;
+}
+
+class ProcessBigDataJob implements ShouldQueue
+{
+    use HasHighCpuUsageQueue;
+}
+
+class ProcessSmallerDataJob implements ShouldQueue
+{
+    use HasMediumCpuUsageQueue;
+}
+```
+
+Run your queues:
+
+```bash
+php artisan queue:run-balanced
+```
+
+**Done.** The package spawns all the queues with adjusted worker counts for each job type.
+
+## Available Traits
+
+| Trait                               | Workload Type          | Use Case                                      |
+|-------------------------------------|------------------------|-----------------------------------------------|
+| `HasHighCpuUsageQueue`              | CPU_HIGH               | Large file processing ~MB/GB                  |
+| `HasMediumCpuUsageQueue`            | CPU_MEDIUM             | PDF generation, smaller file parsing (~KB/MB) |
+| `HasHighNetworkBandwidthUsageQueue` | NETWORK_HIGH_BANDWIDTH | Large file downloads (~ >10MB)                |
+| `HasHighNetworkRequestUsageQueue`   | NETWORK_HIGH_REQUESTS  | API calls, webhooks                           |
+
+## How It Works
+
+By default, `CPU_HIGH` usage assumes 100% CPU utilisation for a single job and 25% for `CPU_MEDIUM`.
+Jobs on `NETWORK_HIGH_BANDWIDTH` are best suited for downloading large files that completely saturate network bandwidth
+whereas `NETWORK_HIGH_REQUESTS` are in most cases are bottleneck by neither network nor cpu and are offloaded on a queue
+simply to improve UX.
+
+If the default configuration doesn't fully utilize your machine, adjust the following default configuration in
+`config/balanced-queues.php`:
+
+```php
+use AdamczykPiotr\LaravelBalancedQueues\Enums\JobWorkloadType;
+
+const CPU_CORES = CpuCoreConfigurationResolver::CPU_CORES;
+
 return [
+    'queues' => [
+        JobWorkloadType::DEFAULT->value => 1,
+        
+        JobWorkloadType::CPU_HIGH->value => CPU_CORES,
+        JobWorkloadType::CPU_MEDIUM->value => 4 * CPU_CORES,
+        JobWorkloadType::NETWORK_HIGH_BANDWIDTH->value => 5,
+        JobWorkloadType::NETWORK_HIGH_REQUESTS->value => 50,
+    ],
 ];
 ```
 
-Optionally, you can publish the views using
+The default configuration aims to ensure best results across wide range of cases.
+In order to get full benefits of this approach, it's *highly* recommended to fine-tune the configuration to *your*
+specific use-case.
+The clue to optimisation is to ensure a *single* queue can fully saturate the machine:
 
-```bash
-php artisan vendor:publish --tag="laravel-balanced-queues-views"
-```
+- Dispatching `CPU_CORES` jobs to `CPU_HIGH` queue should result in ~100% CPU usage
+- Dispatching `4` * `CPU_CORES` jobs to `CPU_MEDIUM` queue should result in ~100% CPU usage
+- Dispatching `5` jobs to `NETWORK_HIGH_BANDWIDTH` queue should result in full network saturation
+- Dispatching `50` jobs to `NETWORK_HIGH_REQUESTS` should result in jobs being finished as soon as possible (no real
+  bottleneck)
 
-## Usage
+In case more than one queue is fully saturated, OS scheduler will balance processes CPU time accordingly.
+
+## Advanced Configuration
+
+### Custom Queue Names
 
 ```php
-$laravelBalancedQueues = new AdamczykPiotr\LaravelBalancedQueues();
-echo $laravelBalancedQueues->echoPhrase('Hello, AdamczykPiotr!');
+'queues' => [
+    'ml-training' => 2 * CPU_CORES,
+    'notifications' => 10,
+    'web-scraping' => 25,
+],
 ```
+
+### VM / Docker CPU Limits
+
+```php
+'defaults' => [
+    'cpu_core_count' => 4,  // Override auto-detected core count
+],
+```
+
+## Commands
+
+```bash
+# Run queue workers
+php artisan queue:run-balanced
+
+# Run in background
+php artisan queue:run-balanced --background
+
+# Get path to generated config and run supervisor manually
+php artisan queue:run-balanced --path-only
+```
+
+## Requirements
+
+- PHP 8.3+
+- Laravel 11.x or 12.x
+- Supervisor
 
 ## Testing
 
