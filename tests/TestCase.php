@@ -2,9 +2,9 @@
 
 namespace AdamczykPiotr\LaravelEfficientQueues\Tests;
 
+use AdamczykPiotr\LaravelEfficientQueues\LaravelEfficientQueuesServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use AdamczykPiotr\LaravelEfficientQueues\LaravelEfficientQueuesServiceProvider;
 
 class TestCase extends Orchestra
 {

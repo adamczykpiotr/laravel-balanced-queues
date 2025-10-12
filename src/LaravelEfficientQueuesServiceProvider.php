@@ -2,9 +2,9 @@
 
 namespace AdamczykPiotr\LaravelEfficientQueues;
 
+use AdamczykPiotr\LaravelEfficientQueues\Commands\LaravelEfficientQueuesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use AdamczykPiotr\LaravelEfficientQueues\Commands\LaravelEfficientQueuesCommand;
 
 class LaravelEfficientQueuesServiceProvider extends PackageServiceProvider
 {
