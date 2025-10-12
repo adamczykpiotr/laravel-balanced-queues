@@ -1,5 +1,5 @@
 <?php
 
-use VendorName\Skeleton\Tests\TestCase;
+use AdamczykPiotr\LaravelEfficientQueues\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

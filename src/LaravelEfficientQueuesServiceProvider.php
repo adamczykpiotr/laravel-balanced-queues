@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace AdamczykPiotr\LaravelEfficientQueues;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use AdamczykPiotr\LaravelEfficientQueues\Commands\LaravelEfficientQueuesCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class LaravelEfficientQueuesServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('laravel-efficient-queues')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_migration_table_name_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_laravel_efficient_queues_table')
+            ->hasCommand(LaravelEfficientQueuesCommand::class);
     }
 }

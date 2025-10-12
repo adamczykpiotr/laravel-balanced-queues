@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace AdamczykPiotr\LaravelEfficientQueues\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class LaravelEfficientQueuesCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'laravel-efficient-queues';
 
     public $description = 'My command';
 
