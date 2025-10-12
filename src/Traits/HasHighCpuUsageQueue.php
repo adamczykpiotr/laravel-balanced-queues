@@ -8,4 +8,3 @@ trait HasHighCpuUsageQueue
 {
     public string $queue = JobWorkloadType::CPU_HIGH->value;
 }
-

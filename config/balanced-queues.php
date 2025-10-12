@@ -15,7 +15,7 @@ return [
     'header' => [
         'supervisord' => [
             'minfds' => 65536,
-        ]
+        ],
     ],
 
     'queues' => [

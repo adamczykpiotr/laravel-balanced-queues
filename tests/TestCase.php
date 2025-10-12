@@ -2,9 +2,9 @@
 
 namespace AdamczykPiotr\LaravelBalancedQueues\Tests;
 
+use AdamczykPiotr\LaravelBalancedQueues\LaravelBalancedQueuesServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use AdamczykPiotr\LaravelBalancedQueues\LaravelBalancedQueuesServiceProvider;
 
 class TestCase extends Orchestra
 {

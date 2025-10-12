@@ -8,4 +8,3 @@ trait HasMediumCpuUsageQueue
 {
     public string $queue = JobWorkloadType::CPU_MEDIUM->value;
 }
-

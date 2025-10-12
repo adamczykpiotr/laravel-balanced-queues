@@ -8,4 +8,3 @@ trait HasHighNetworkRequestUsageQueue
 {
     public string $queue = JobWorkloadType::NETWORK_HIGH_REQUESTS->value;
 }
-

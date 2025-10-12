@@ -11,13 +11,9 @@ class CpuCoreResolver
      * It doesn't represent the actual number of CPU cores and is resolved during runtime.
      */
     const float CPU_CORES = M_PI;
+
     protected static ?int $cpuCoreCount = null;
 
-
-    /**
-     * @param float|int $value
-     * @return int
-     */
     public function resolveCpuCores(float|int $value): int
     {
         // Absolute value
@@ -26,20 +22,17 @@ class CpuCoreResolver
         }
 
         // Round value (i.e. 3.0, 2.25)
-        $decimalPlaces = Str::of((string)$value)->after('.')->length();
+        $decimalPlaces = Str::of((string) $value)->after('.')->length();
         if (is_float($value) && $decimalPlaces < 3) {
-            return (int)round($value);
+            return (int) round($value);
         }
 
         // Relative to CPU_CORES
         $relative = $value / self::CPU_CORES;
-        return (int)round($relative * $this->getCpuCoreCount());
+
+        return (int) round($relative * $this->getCpuCoreCount());
     }
 
-
-    /**
-     * @return int
-     */
     public function getCpuCoreCount(): int
     {
         if (self::$cpuCoreCount !== null) {
@@ -52,7 +45,8 @@ class CpuCoreResolver
         };
 
         $output = shell_exec($command);
-        self::$cpuCoreCount = (int)$output;
+        self::$cpuCoreCount = (int) $output;
+
         return self::$cpuCoreCount;
     }
 }

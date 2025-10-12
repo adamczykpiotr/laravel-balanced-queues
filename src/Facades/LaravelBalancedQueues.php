@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Facade;
  */
 class LaravelBalancedQueues extends Facade
 {
-    /**
-     * @return string
-     */
     protected static function getFacadeAccessor(): string
     {
         return \AdamczykPiotr\LaravelBalancedQueues\LaravelBalancedQueues::class;

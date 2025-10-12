@@ -15,12 +15,9 @@ class RunBalancedQueuesCommand extends Command
     public $description = 'Command to run spawn supervisord process with balanced queues configuration';
 
     const string SUPERVISORD_BINARY = 'supervisord';
+
     const string CONFIG_FILE_PREFIX = 'supervisord-config-';
 
-    /**
-     * @param SupervisorConfigGenerator $supervisorConfigGenerator
-     * @return int
-     */
     public function handle(SupervisorConfigGenerator $supervisorConfigGenerator): int
     {
         $config = $supervisorConfigGenerator->generate();
@@ -34,6 +31,7 @@ class RunBalancedQueuesCommand extends Command
         $pathOnly = $this->option('path-only');
         if ($pathOnly === true) {
             $this->line($configPath);
+
             return self::SUCCESS;
         }
 
@@ -42,7 +40,7 @@ class RunBalancedQueuesCommand extends Command
         $command = collect([
             static::SUPERVISORD_BINARY,
             ($daemonMode ? null : '--nodaemon'),
-            "--configuration", $configPath,
+            '--configuration', $configPath,
         ])
             ->filter()
             ->join(' ');
@@ -52,11 +50,6 @@ class RunBalancedQueuesCommand extends Command
         return self::SUCCESS;
     }
 
-
-    /**
-     * @param string $directory
-     * @return void
-     */
     protected function cleanup(string $directory): void
     {
         $prefix = static::CONFIG_FILE_PREFIX;

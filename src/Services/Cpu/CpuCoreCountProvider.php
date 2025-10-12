@@ -6,9 +6,6 @@ class CpuCoreCountProvider implements CpuCoreCountProviderContract
 {
     protected static ?int $cpuCoreCount = null;
 
-    /**
-     * @return int
-     */
     public function getCpuCoreCount(): int
     {
         if (self::$cpuCoreCount !== null) {
@@ -21,7 +18,8 @@ class CpuCoreCountProvider implements CpuCoreCountProviderContract
         };
 
         $output = shell_exec($command);
-        self::$cpuCoreCount = (int)$output;
+        self::$cpuCoreCount = (int) $output;
+
         return self::$cpuCoreCount;
     }
 }

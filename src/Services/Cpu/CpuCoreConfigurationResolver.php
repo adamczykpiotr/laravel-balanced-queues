@@ -13,10 +13,7 @@ class CpuCoreConfigurationResolver
      */
     const float CPU_CORES = M_PI;
 
-
     /**
-     * @param float|int $value
-     * @return int
      * @throws BindingResolutionException
      */
     public function resolveCpuCores(float|int $value): int
@@ -27,19 +24,18 @@ class CpuCoreConfigurationResolver
         }
 
         // Round value (i.e. 3.0, 2.25)
-        $decimalPlaces = Str::of((string)$value)->after('.')->length();
+        $decimalPlaces = Str::of((string) $value)->after('.')->length();
         if (is_float($value) && $decimalPlaces < 3) {
-            return (int)round($value);
+            return (int) round($value);
         }
 
         // Relative to CPU_CORES
         $relative = $value / self::CPU_CORES;
-        return (int)round($relative * $this->getCpuCoreCount());
+
+        return (int) round($relative * $this->getCpuCoreCount());
     }
 
-
     /**
-     * @return int
      * @throws BindingResolutionException
      */
     public function getCpuCoreCount(): int
@@ -48,7 +44,7 @@ class CpuCoreConfigurationResolver
 
         // Pre-defined number of CPU cores
         if (is_numeric($resolver)) {
-            return (int)$resolver;
+            return (int) $resolver;
         }
 
         $resolverInstance = app()->make($resolver);
