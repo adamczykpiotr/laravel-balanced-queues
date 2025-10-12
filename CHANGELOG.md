@@ -1,3 +1,3 @@
 # Changelog
 
-All notable changes to `laravel-efficient-queues` will be documented in this file.
+All notable changes to `laravel-balanced-queues` will be documented in this file.
