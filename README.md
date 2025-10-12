@@ -86,14 +86,14 @@ If the default configuration doesn't fully utilize your machine, adjust the foll
 ```php
 use AdamczykPiotr\LaravelBalancedQueues\Enums\JobWorkloadType;
 
-const CPU_CORES = CpuCoreConfigurationResolver::CPU_CORES;
+$CPU_CORES = CpuCoreConfigurationResolver::CPU_CORES;
 
 return [
     'queues' => [
         JobWorkloadType::DEFAULT->value => 1,
         
-        JobWorkloadType::CPU_HIGH->value => CPU_CORES,
-        JobWorkloadType::CPU_MEDIUM->value => 4 * CPU_CORES,
+        JobWorkloadType::CPU_HIGH->value => $CPU_CORES,
+        JobWorkloadType::CPU_MEDIUM->value => 4 * $CPU_CORES,
         JobWorkloadType::NETWORK_HIGH_BANDWIDTH->value => 5,
         JobWorkloadType::NETWORK_HIGH_REQUESTS->value => 50,
     ],
