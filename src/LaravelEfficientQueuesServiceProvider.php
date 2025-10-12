@@ -18,8 +18,6 @@ class LaravelEfficientQueuesServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-efficient-queues')
             ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_laravel_efficient_queues_table')
             ->hasCommand(LaravelEfficientQueuesCommand::class);
     }
 }
