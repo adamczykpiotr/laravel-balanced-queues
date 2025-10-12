@@ -1,12 +1,12 @@
 {
-    "name": "adamczykpiotr/laravel-efficient-queues",
+    "name": "adamczykpiotr/laravel-balanced-queues",
     "description": "Laravel package designed to optimize the performance and efficiency of your application's queue usage",
     "keywords": [
         "AdamczykPiotr",
         "laravel",
-        "laravel-efficient-queues"
+        "laravel-balanced-queues"
     ],
-    "homepage": "https://github.com/adamczykpiotr/laravel-efficient-queues",
+    "homepage": "https://github.com/adamczykpiotr/laravel-balanced-queues",
     "license": "MIT",
     "authors": [
         {
@@ -34,13 +34,13 @@
     },
     "autoload": {
         "psr-4": {
-            "AdamczykPiotr\\LaravelEfficientQueues\\": "src/",
-            "AdamczykPiotr\\LaravelEfficientQueues\\Database\\Factories\\": "database/factories/"
+            "AdamczykPiotr\\LaravelBalancedQueues\\": "src/",
+            "AdamczykPiotr\\LaravelBalancedQueues\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "AdamczykPiotr\\LaravelEfficientQueues\\Tests\\": "tests/",
+            "AdamczykPiotr\\LaravelBalancedQueues\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -62,10 +62,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "AdamczykPiotr\\LaravelEfficientQueues\\LaravelEfficientQueuesServiceProvider"
+                "AdamczykPiotr\\LaravelBalancedQueues\\LaravelBalancedQueuesServiceProvider"
             ],
             "aliases": {
-                "LaravelEfficientQueues": "AdamczykPiotr\\LaravelEfficientQueues\\Facades\\LaravelEfficientQueues"
+                "LaravelBalancedQueues": "AdamczykPiotr\\LaravelBalancedQueues\\Facades\\LaravelBalancedQueues"
             }
         }
     },

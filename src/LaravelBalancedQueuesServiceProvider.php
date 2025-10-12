@@ -1,13 +1,17 @@
 <?php
 
-namespace AdamczykPiotr\LaravelEfficientQueues;
+namespace AdamczykPiotr\LaravelBalancedQueues;
 
-use AdamczykPiotr\LaravelEfficientQueues\Commands\LaravelEfficientQueuesCommand;
+use AdamczykPiotr\LaravelBalancedQueues\Commands\RunBalancedQueuesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class LaravelEfficientQueuesServiceProvider extends PackageServiceProvider
+class LaravelBalancedQueuesServiceProvider extends PackageServiceProvider
 {
+    /**
+     * @param Package $package
+     * @return void
+     */
     public function configurePackage(Package $package): void
     {
         /*
@@ -16,8 +20,8 @@ class LaravelEfficientQueuesServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('laravel-efficient-queues')
+            ->name('laravel-balanced-queues')
             ->hasConfigFile()
-            ->hasCommand(LaravelEfficientQueuesCommand::class);
+            ->hasCommand(RunBalancedQueuesCommand::class);
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace AdamczykPiotr\LaravelEfficientQueues\Tests;
+namespace AdamczykPiotr\LaravelBalancedQueues\Tests;
 
-use AdamczykPiotr\LaravelEfficientQueues\LaravelEfficientQueuesServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
+use AdamczykPiotr\LaravelBalancedQueues\LaravelBalancedQueuesServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -13,14 +13,14 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'AdamczykPiotr\\LaravelEfficientQueues\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'AdamczykPiotr\\LaravelBalancedQueues\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            LaravelEfficientQueuesServiceProvider::class,
+            LaravelBalancedQueuesServiceProvider::class,
         ];
     }
 
