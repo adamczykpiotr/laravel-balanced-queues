@@ -4,7 +4,4 @@ namespace AdamczykPiotr\LaravelBalancedQueues\Exceptions;
 
 use Exception;
 
-class InvalidCpuCoreCountProviderException extends Exception
-{
-
-}
+class InvalidCpuCoreCountProviderException extends Exception {}
