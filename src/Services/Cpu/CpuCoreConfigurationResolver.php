@@ -2,7 +2,7 @@
 
 namespace AdamczykPiotr\LaravelBalancedQueues\Services\Cpu;
 
-use Illuminate\Contracts\Container\BindingResolutionException;
+use AdamczykPiotr\LaravelBalancedQueues\Exceptions\InvalidCpuCoreCountProviderException;
 use Illuminate\Support\Str;
 
 class CpuCoreConfigurationResolver
@@ -14,7 +14,7 @@ class CpuCoreConfigurationResolver
     const float CPU_CORES = M_PI;
 
     /**
-     * @throws BindingResolutionException
+     * @throws InvalidCpuCoreCountProviderException
      */
     public function resolveCpuCores(float|int $value): int
     {
@@ -25,7 +25,7 @@ class CpuCoreConfigurationResolver
 
         // Round value (i.e. 3.0, 2.25)
         $decimalPlaces = Str::of((string) $value)->after('.')->length();
-        if (is_float($value) && $decimalPlaces < 3) {
+        if ($decimalPlaces < 3) {
             return (int) round($value);
         }
 
@@ -36,7 +36,7 @@ class CpuCoreConfigurationResolver
     }
 
     /**
-     * @throws BindingResolutionException
+     * @throws InvalidCpuCoreCountProviderException
      */
     public function getCpuCoreCount(): int
     {
@@ -47,9 +47,13 @@ class CpuCoreConfigurationResolver
             return (int) $resolver;
         }
 
-        $resolverInstance = app()->make($resolver);
-        assert($resolverInstance instanceof CpuCoreCountProviderContract);
+        /** @var CpuCoreCountProviderContract $instance */
+        $instance = match (true) {
+            is_string($resolver) && is_subclass_of($resolver, CpuCoreCountProviderContract::class) => app()->make($resolver),
+            $resolver instanceof CpuCoreCountProviderContract => $resolver,
+            default => throw new InvalidCpuCoreCountProviderException
+        };
 
-        return $resolverInstance->getCpuCoreCount();
+        return $instance->getCpuCoreCount();
     }
 }

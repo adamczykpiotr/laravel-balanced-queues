@@ -15,14 +15,15 @@ class SupervisorConfigGenerator
 
     public function generate(): string
     {
-        $config = collect(config('balanced-queues'));
+        /** @var Collection<string, array<string, mixed>> $config */
+        $config = collect((array) config('balanced-queues'));
 
         $header = $this->buildHeader(
             collect($config->get('header', []))
         );
 
         $queues = collect($config->get('queues', []))
-            ->map(fn (int|float $coreCount, string $workloadType) => $this->generateConfigEntry(
+            ->map(fn (float|int $coreCount, string $workloadType) => $this->generateConfigEntry(
                 JobWorkloadType::from($workloadType),
                 max($this->cpuCoreResolver->resolveCpuCores($coreCount), 1)
             ))
@@ -52,6 +53,9 @@ stdout_logfile={$path}/%(process_num)03d.log
 stderr_logfile={$path}/%(process_num)03d_error.log";
     }
 
+    /**
+     * @param  Collection<string, array<string, string|int|float>|null>  $header
+     */
     protected function buildHeader(Collection $header): string
     {
         $groups = $header->map(function (?array $items, string $groupName) {
