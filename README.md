@@ -12,13 +12,12 @@ type (CPU-intensive, API calls, file downloads) and your server's resources.
 
 Running 10 workers for everything? **You're wasting resources or creating bottlenecks.**
 
-- 🔴 **Image downloads** saturate your network with too many workers
-- 🟡 **API calls** queue up with too few concurrent workers
-- 🟠 **CPU jobs** leave cores idle or cause context-switching overhead
+- **Image downloads** saturate your network with too many workers
+- **API calls** queue up with too few concurrent workers
+- **CPU jobs** leave cores idle or cause context-switching overhead
 
 Are you running your application on different machines? Different CPU core configurations, changing network bandwidth?
-
-**Wth this package you can optimize it automatically and fine tune it for best results.**
+**With this package you can optimize it automatically and fine tune it for best results.**
 
 ## Quick Start
 
@@ -145,6 +144,16 @@ php artisan queue:run-balanced --background
 # Get path to generated config and run supervisor manually
 php artisan queue:run-balanced --path-only
 ```
+
+## Docker container entrypoint example
+```
+#!/bin/sh
+set -e
+
+SUPERVISORD_CONFIG_PATH=$(php artisan queue:run-balanced --path-only)
+exec /usr/bin/supervisord -n -c "$SUPERVISORD_CONFIG_PATH"
+```
+
 
 ## Requirements
 
