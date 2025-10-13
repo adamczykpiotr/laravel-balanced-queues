@@ -9,20 +9,24 @@ use Illuminate\Support\Facades\File;
 
 class SupervisorConfigGenerator
 {
+    /**
+     * @param CpuCoreConfigurationResolver $cpuCoreResolver
+     */
     public function __construct(
         protected CpuCoreConfigurationResolver $cpuCoreResolver,
     ) {}
 
     public function generate(): string
     {
-        $config = collect(config('balanced-queues'));
+        /** @var Collection<string, array<string, mixed>> $config */
+        $config = collect((array)config('balanced-queues'));
 
         $header = $this->buildHeader(
             collect($config->get('header', []))
         );
 
         $queues = collect($config->get('queues', []))
-            ->map(fn (int|float $coreCount, string $workloadType) => $this->generateConfigEntry(
+            ->map(fn(float|int $coreCount, string $workloadType) => $this->generateConfigEntry(
                 JobWorkloadType::from($workloadType),
                 max($this->cpuCoreResolver->resolveCpuCores($coreCount), 1)
             ))
@@ -31,6 +35,11 @@ class SupervisorConfigGenerator
         return "$header\n\n$queues\n";
     }
 
+    /**
+     * @param JobWorkloadType $workloadType
+     * @param int $coreCount
+     * @return string
+     */
     protected function generateConfigEntry(JobWorkloadType $workloadType, int $coreCount): string
     {
         $path = base_path("storage/logs/queue/{$workloadType->value}");
@@ -52,6 +61,10 @@ stdout_logfile={$path}/%(process_num)03d.log
 stderr_logfile={$path}/%(process_num)03d_error.log";
     }
 
+    /**
+     * @param Collection<string, array<string, string|int|float>|null> $header
+     * @return string
+     */
     protected function buildHeader(Collection $header): string
     {
         $groups = $header->map(function (?array $items, string $groupName) {
@@ -67,6 +80,9 @@ stderr_logfile={$path}/%(process_num)03d_error.log";
         return $groups->filter()->implode("\n\n");
     }
 
+    /**
+     * @return string
+     */
     protected function getPhpExecutable(): string
     {
         return defined('PHP_BINARY')
@@ -74,6 +90,9 @@ stderr_logfile={$path}/%(process_num)03d_error.log";
             : 'php';
     }
 
+    /**
+     * @return string
+     */
     protected function getArtisanPath(): string
     {
         return base_path('artisan');

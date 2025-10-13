@@ -2,7 +2,8 @@
 
 namespace AdamczykPiotr\LaravelBalancedQueues\Services\Cpu;
 
-use Illuminate\Contracts\Container\BindingResolutionException;
+use AdamczykPiotr\LaravelBalancedQueues\Exceptions\InvalidCpuCoreCountProviderException;
+use Exception;
 use Illuminate\Support\Str;
 
 class CpuCoreConfigurationResolver
@@ -13,8 +14,11 @@ class CpuCoreConfigurationResolver
      */
     const float CPU_CORES = M_PI;
 
+
     /**
-     * @throws BindingResolutionException
+     * @param float|int $value
+     * @return int
+     * @throws InvalidCpuCoreCountProviderException
      */
     public function resolveCpuCores(float|int $value): int
     {
@@ -24,19 +28,20 @@ class CpuCoreConfigurationResolver
         }
 
         // Round value (i.e. 3.0, 2.25)
-        $decimalPlaces = Str::of((string) $value)->after('.')->length();
-        if (is_float($value) && $decimalPlaces < 3) {
-            return (int) round($value);
+        $decimalPlaces = Str::of((string)$value)->after('.')->length();
+        if ($decimalPlaces < 3) {
+            return (int)round($value);
         }
 
         // Relative to CPU_CORES
         $relative = $value / self::CPU_CORES;
-
-        return (int) round($relative * $this->getCpuCoreCount());
+        return (int)round($relative * $this->getCpuCoreCount());
     }
 
+
     /**
-     * @throws BindingResolutionException
+     * @return int
+     * @throws InvalidCpuCoreCountProviderException
      */
     public function getCpuCoreCount(): int
     {
@@ -44,12 +49,17 @@ class CpuCoreConfigurationResolver
 
         // Pre-defined number of CPU cores
         if (is_numeric($resolver)) {
-            return (int) $resolver;
+            return (int)$resolver;
         }
 
-        $resolverInstance = app()->make($resolver);
-        assert($resolverInstance instanceof CpuCoreCountProviderContract);
 
-        return $resolverInstance->getCpuCoreCount();
+        /** @var CpuCoreCountProviderContract $instance */
+        $instance = match (true) {
+            is_string($resolver) && is_subclass_of($resolver, CpuCoreCountProviderContract::class) => app()->make($resolver),
+            $resolver instanceof CpuCoreCountProviderContract => $resolver,
+            default => throw new InvalidCpuCoreCountProviderException()
+        };
+
+        return $instance->getCpuCoreCount();
     }
 }
