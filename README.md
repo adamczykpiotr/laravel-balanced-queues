@@ -29,29 +29,34 @@ php artisan vendor:publish --tag="laravel-balanced-queues-config"
 Tag your jobs with the right workload type using traits:
 
 ```php
-use AdamczykPiotr\LaravelBalancedQueues\Traits\HasHighNetworkBandwidthUsageQueue;
-use AdamczykPiotr\LaravelBalancedQueues\Traits\HasHighNetworkRequestUsageQueue;
-use AdamczykPiotr\LaravelBalancedQueues\Traits\HasMediumCpuUsageQueue;
-use AdamczykPiotr\LaravelBalancedQueues\Traits\HasHighCpuUsageQueue;
+use AdamczykPiotr\LaravelBalancedQueues\Traits\HasBalancedQueues;
 
 class ScrapeVideosJob implements ShouldQueue
 {
-    use HasHighNetworkBandwidthUsageQueue;
+    public function __construct() {
+        $this->onHighNetworkBandwidthUsageQueu();
+    }
 }
 
 class CallApiJob implements ShouldQueue
 {
-    use HasHighNetworkRequestUsageQueue;
+    public function __construct() {
+        $this->onHighNetworkRequestUsageQueue();
+    }
 }
 
 class ProcessBigDataJob implements ShouldQueue
 {
-    use HasHighCpuUsageQueue;
+    public function __construct() {
+        $this->onHighCpuUsageQueue();
+    }
 }
 
 class ProcessSmallerDataJob implements ShouldQueue
 {
-    use HasMediumCpuUsageQueue;
+    public function __construct() {
+        $this->onMediumCpuUsageQueue();
+    }
 }
 ```
 
@@ -63,14 +68,14 @@ php artisan queue:run-balanced
 
 **Done.** The package spawns all the queues with adjusted worker counts for each job type.
 
-## Available Traits
+## Available helpers
 
-| Trait                               | Workload Type          | Use Case                                      |
-|-------------------------------------|------------------------|-----------------------------------------------|
-| `HasHighCpuUsageQueue`              | CPU_HIGH               | Large file processing ~MB/GB                  |
-| `HasMediumCpuUsageQueue`            | CPU_MEDIUM             | PDF generation, smaller file parsing (~KB/MB) |
-| `HasHighNetworkBandwidthUsageQueue` | NETWORK_HIGH_BANDWIDTH | Large file downloads (~ >10MB)                |
-| `HasHighNetworkRequestUsageQueue`   | NETWORK_HIGH_REQUESTS  | API calls, webhooks                           |
+| Helper method                      | Workload Type          | Use Case                                      |
+|------------------------------------|------------------------|-----------------------------------------------|
+| `onHighCpuUsageQueue`              | CPU_HIGH               | Large file processing ~MB/GB                  |
+| `onMediumCpuUsageQueue`            | CPU_MEDIUM             | PDF generation, smaller file parsing (~KB/MB) |
+| `onHighNetworkRequestUsageQueue`   | NETWORK_HIGH_BANDWIDTH | Large file downloads (~ >10MB)                |
+| `onHighNetworkBandwidthUsageQueue` | NETWORK_HIGH_REQUESTS  | API calls, webhooks                           |
 
 ## How It Works
 
@@ -146,6 +151,7 @@ php artisan queue:run-balanced --path-only
 ```
 
 ## Docker container entrypoint example
+
 ```
 #!/bin/sh
 set -e
@@ -153,7 +159,6 @@ set -e
 SUPERVISORD_CONFIG_PATH=$(php artisan queue:run-balanced --path-only)
 exec /usr/bin/supervisord -n -c "$SUPERVISORD_CONFIG_PATH"
 ```
-
 
 ## Requirements
 
