@@ -9,13 +9,11 @@ $CPU_CORES = CpuCoreConfigurationResolver::CPU_CORES;
 return [
 
     'defaults' => [
-        'cpu_core_count' => CpuCoreCountProvider::class,
+        'cpu_core_count' => 4, // CpuCoreCountProvider::class,
     ],
 
     'header' => [
-        'supervisord' => [
-            'minfds' => 65536,
-        ],
+        'supervisord' => [],
     ],
 
     'queues' => [

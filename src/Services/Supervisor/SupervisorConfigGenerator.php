@@ -58,6 +58,11 @@ stderr_logfile={$path}/%(process_num)03d_error.log";
      */
     protected function buildHeader(Collection $header): string
     {
+        $requiredSectionName = 'supervisord';
+        if ($header->has($requiredSectionName) === false) {
+            $header->put($requiredSectionName, []);
+        }
+
         $groups = $header->map(function (?array $items, string $groupName) {
             if ($items === null) {
                 return null;
