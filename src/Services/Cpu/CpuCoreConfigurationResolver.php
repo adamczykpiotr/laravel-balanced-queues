@@ -3,6 +3,7 @@
 namespace AdamczykPiotr\LaravelBalancedQueues\Services\Cpu;
 
 use AdamczykPiotr\LaravelBalancedQueues\Exceptions\InvalidCpuCoreCountProviderException;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Str;
 
 class CpuCoreConfigurationResolver
@@ -14,6 +15,7 @@ class CpuCoreConfigurationResolver
     const float CPU_CORES = M_PI;
 
     /**
+     * @throws BindingResolutionException
      * @throws InvalidCpuCoreCountProviderException
      */
     public function resolveCpuCores(float|int $value): int
@@ -37,6 +39,7 @@ class CpuCoreConfigurationResolver
 
     /**
      * @throws InvalidCpuCoreCountProviderException
+     * @throws BindingResolutionException
      */
     public function getCpuCoreCount(): int
     {
