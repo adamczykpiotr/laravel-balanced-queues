@@ -2,7 +2,6 @@
 
 namespace AdamczykPiotr\LaravelBalancedQueues\Services\Supervisor;
 
-use AdamczykPiotr\LaravelBalancedQueues\Enums\JobWorkloadType;
 use AdamczykPiotr\LaravelBalancedQueues\Services\Cpu\CpuCoreConfigurationResolver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -24,7 +23,7 @@ class SupervisorConfigGenerator
 
         $queues = collect($config->get('queues', []))
             ->map(fn (float|int $coreCount, string $workloadType) => $this->generateConfigEntry(
-                JobWorkloadType::from($workloadType),
+                $workloadType,
                 max($this->cpuCoreResolver->resolveCpuCores($coreCount), 1)
             ))
             ->join("\n\n");
@@ -32,9 +31,9 @@ class SupervisorConfigGenerator
         return "$header\n\n$queues\n";
     }
 
-    protected function generateConfigEntry(JobWorkloadType $workloadType, int $coreCount): string
+    protected function generateConfigEntry(string $workloadType, int $coreCount): string
     {
-        $path = base_path("storage/logs/queue/{$workloadType->value}");
+        $path = base_path("storage/logs/queue/{$workloadType}");
         if (File::exists($path) === false) {
             File::makeDirectory($path, recursive: true);
         }
@@ -42,9 +41,9 @@ class SupervisorConfigGenerator
         $executablePath = $this->getPhpExecutable();
         $artisanPath = $this->getArtisanPath();
 
-        return "[program:queue-{$workloadType->value}]
+        return "[program:queue-{$workloadType}]
 process_name=%(program_name)s_%(process_num)03d
-command={$executablePath} {$artisanPath} queue:work --queue={$workloadType->value}
+command={$executablePath} {$artisanPath} queue:work --queue={$workloadType}
 autostart=true
 autorestart=true
 numprocs={$coreCount}
