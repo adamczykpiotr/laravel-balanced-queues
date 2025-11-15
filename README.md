@@ -23,7 +23,7 @@ Are you running your application on different machines? Different CPU core confi
 
 ```bash
 composer require adamczykpiotr/laravel-balanced-queues
-php artisan vendor:publish --tag="laravel-balanced-queues-config"
+php artisan vendor:publish --tag="balanced-queues-config"
 ```
 
 Tag your jobs with the right workload type using traits:
