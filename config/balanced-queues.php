@@ -2,19 +2,26 @@
 
 use AdamczykPiotr\LaravelBalancedQueues\Enums\JobWorkloadType;
 use AdamczykPiotr\LaravelBalancedQueues\Services\Cpu\CpuCoreConfigurationResolver;
-use AdamczykPiotr\LaravelBalancedQueues\Services\Cpu\CpuCoreCountProvider;
 
 $CPU_CORES = CpuCoreConfigurationResolver::CPU_CORES;
 
 return [
 
-    'defaults' => [
+    /*
+    |--------------------------------------------------------------------------
+    | Package configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'package' => [
         'cpu_core_count' => 4, // CpuCoreCountProvider::class,
     ],
 
-    'header' => [
-        'supervisord' => [],
-    ],
+    /*
+    |--------------------------------------------------------------------------
+    | Queue names handled by Supervisor
+    |--------------------------------------------------------------------------
+    */
 
     'queues' => [
         JobWorkloadType::DEFAULT->value => 1,
@@ -24,5 +31,26 @@ return [
 
         JobWorkloadType::NETWORK_HIGH_BANDWIDTH->value => 5,
         JobWorkloadType::NETWORK_HIGH_REQUESTS->value => 50,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Additional laravel `artisan queue:work` configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'worker_options' => [
+        // '--silent'
+        // '--timeout' => 60
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Additional Supervisor configuration header
+    |--------------------------------------------------------------------------
+    */
+
+    'supervisor' => [
+        'header' => [],
     ],
 ];
