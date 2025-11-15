@@ -5,34 +5,41 @@ namespace AdamczykPiotr\LaravelBalancedQueues\Services\Supervisor;
 use AdamczykPiotr\LaravelBalancedQueues\Services\Cpu\CpuCoreConfigurationResolver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
-class SupervisorConfigGenerator
-{
+class SupervisorConfigGenerator {
+
     public function __construct(
         protected CpuCoreConfigurationResolver $cpuCoreResolver,
-    ) {}
+    ) {
+    }
 
-    public function generate(): string
-    {
+
+    public function generate(): string {
         /** @var Collection<string, array<string, mixed>> $config */
         $config = collect((array) config('balanced-queues'));
 
-        $header = $this->buildHeader(
-            collect($config->get('header', []))
+        $workerOptions = $this->buildWorkerOptionString(
+            collect($config->get('worker_options', []))
         );
 
         $queues = collect($config->get('queues', []))
-            ->map(fn (float|int $coreCount, string $workloadType) => $this->generateConfigEntry(
+            ->map(fn(float|int $coreCount, string $workloadType) => $this->generateConfigEntry(
                 $workloadType,
-                max($this->cpuCoreResolver->resolveCpuCores($coreCount), 1)
+                max($this->cpuCoreResolver->resolveCpuCores($coreCount), 1),
+                $workerOptions
             ))
             ->join("\n\n");
+
+        $header = $this->buildSupervsorHeader(
+            collect($config->get('supervisor.header', []))
+        );
 
         return "$header\n\n$queues\n";
     }
 
-    protected function generateConfigEntry(string $workloadType, int $coreCount): string
-    {
+
+    protected function generateConfigEntry(string $workloadType, int $coreCount, string $optionString): string {
         $path = base_path("storage/logs/queue/{$workloadType}");
         if (File::exists($path) === false) {
             File::makeDirectory($path, recursive: true);
@@ -43,7 +50,7 @@ class SupervisorConfigGenerator
 
         return "[program:queue-{$workloadType}]
 process_name=%(program_name)s_%(process_num)03d
-command={$executablePath} {$artisanPath} queue:work --queue={$workloadType}
+command={$executablePath} {$artisanPath} queue:work --queue={$workloadType} {$optionString}
 autostart=true
 autorestart=true
 numprocs={$coreCount}
@@ -52,22 +59,22 @@ stdout_logfile={$path}/%(process_num)03d.log
 stderr_logfile={$path}/%(process_num)03d_error.log";
     }
 
+
     /**
-     * @param  Collection<string, array<string, string|int|float>|null>  $header
+     * @param Collection<string, array<string, string|int|float>|null> $header
      */
-    protected function buildHeader(Collection $header): string
-    {
+    protected function buildSupervsorHeader(Collection $header): string {
         $requiredSectionName = 'supervisord';
         if ($header->has($requiredSectionName) === false) {
             $header->put($requiredSectionName, []);
         }
 
-        $groups = $header->map(function (?array $items, string $groupName) {
+        $groups = $header->map(function(?array $items, string $groupName) {
             if ($items === null) {
                 return null;
             }
 
-            $items = collect($items)->map(fn ($value, $key) => "$key=$value")->implode("\n");
+            $items = collect($items)->map(fn($value, $key) => "$key=$value")->implode("\n");
 
             return "[$groupName]\n$items";
         });
@@ -75,15 +82,31 @@ stderr_logfile={$path}/%(process_num)03d_error.log";
         return $groups->filter()->implode("\n\n");
     }
 
-    protected function getPhpExecutable(): string
-    {
+
+    protected function buildWorkerOptionString(Collection $options): string {
+        return $options
+            ->forget(['queue'])
+            ->map(function(mixed $value, string|int $key) {
+                $isFlag = is_int($key);
+                if ($isFlag) {
+                    return (string) $value;
+                }
+
+                return "$key=$value";
+            })
+            ->filter(fn(mixed $value) => Str::startsWith($value, '--'))
+            ->implode(' ');
+    }
+
+
+    protected function getPhpExecutable(): string {
         return defined('PHP_BINARY')
             ? PHP_BINARY
             : 'php';
     }
 
-    protected function getArtisanPath(): string
-    {
+
+    protected function getArtisanPath(): string {
         return base_path('artisan');
     }
 }

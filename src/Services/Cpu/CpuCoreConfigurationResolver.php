@@ -43,7 +43,7 @@ class CpuCoreConfigurationResolver
      */
     public function getCpuCoreCount(): int
     {
-        $resolver = config('balanced-queues.defaults.cpu_core_count');
+        $resolver = config('balanced-queues.package.cpu_core_count');
 
         // Pre-defined number of CPU cores
         if (is_numeric($resolver)) {

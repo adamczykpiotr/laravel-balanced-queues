@@ -95,7 +95,7 @@ $CPU_CORES = CpuCoreConfigurationResolver::CPU_CORES;
 return [
     'queues' => [
         JobWorkloadType::DEFAULT->value => 1,
-        
+
         JobWorkloadType::CPU_HIGH->value => $CPU_CORES,
         JobWorkloadType::CPU_MEDIUM->value => 4 * $CPU_CORES,
         JobWorkloadType::NETWORK_HIGH_BANDWIDTH->value => 5,
@@ -123,7 +123,7 @@ In case more than one queue is fully saturated, OS scheduler will balance proces
 
 ```php
 'queues' => [
-    'ml-training' => 2 * CPU_CORES,
+    'ml-training' => 2 * $CPU_CORES,
     'notifications' => 10,
     'web-scraping' => 25,
 ],
@@ -131,9 +131,36 @@ In case more than one queue is fully saturated, OS scheduler will balance proces
 
 ### VM / Docker CPU Limits
 
+Override auto-detected CPU core count:
+
 ```php
-'defaults' => [
+'package' => [
     'cpu_core_count' => 4,  // Override auto-detected core count
+],
+```
+
+### Worker Options
+
+Add additional options to `artisan queue:work` command:
+
+```php
+'worker_options' => [
+    '--timeout' => 60,
+    '--tries' => 3,
+    '--sleep' => 3,
+],
+```
+
+### Supervisor Configuration
+
+Customize the generated Supervisor configuration:
+
+```php
+'supervisor' => [
+    'header' => [
+        'user' => 'www-data',
+        'numprocs' => 1,
+    ],
 ],
 ```
 
