@@ -48,6 +48,7 @@ class SupervisorConfigGenerator
 
         $executablePath = $this->getPhpExecutable();
         $artisanPath = $this->getArtisanPath();
+        $signalHandling = $this->buildSignalHandlingConfig();
 
         return "[program:queue-{$workloadType}]
 process_name=%(program_name)s_%(process_num)03d
@@ -57,7 +58,38 @@ autorestart=true
 numprocs={$coreCount}
 redirect_stderr=true
 stdout_logfile={$path}/%(process_num)03d.log
-stderr_logfile={$path}/%(process_num)03d_error.log";
+stderr_logfile={$path}/%(process_num)03d_error.log{$signalHandling}";
+    }
+
+    protected function buildSignalHandlingConfig(): string
+    {
+        $config = [];
+
+        $stopsignal = config('balanced-queues.supervisor.stopsignal');
+        if ($stopsignal !== null) {
+            $config[] = "stopsignal={$stopsignal}";
+        }
+
+        $stopwaitsecs = config('balanced-queues.supervisor.stopwaitsecs');
+        if ($stopwaitsecs !== null) {
+            $config[] = "stopwaitsecs={$stopwaitsecs}";
+        }
+
+        $stopasgroup = config('balanced-queues.supervisor.stopasgroup');
+        if ($stopasgroup !== null) {
+            $config[] = 'stopasgroup='.($stopasgroup ? 'true' : 'false');
+        }
+
+        $killasgroup = config('balanced-queues.supervisor.killasgroup');
+        if ($killasgroup !== null) {
+            $config[] = 'killasgroup='.($killasgroup ? 'true' : 'false');
+        }
+
+        if (empty($config)) {
+            return '';
+        }
+
+        return "\n".implode("\n", $config);
     }
 
     /**

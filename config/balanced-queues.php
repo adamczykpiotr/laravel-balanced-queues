@@ -53,5 +53,21 @@ return [
 
     'supervisor' => [
         'header' => [],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Signal handling for graceful shutdowns
+        |--------------------------------------------------------------------------
+        |
+        | These options improve handling of graceful shutdowns, especially in
+        | dockerized/orchestrated environments. Configure stopwaitsecs to be
+        | greater than the longest job duration (worker timeout value or higher).
+        |
+        */
+
+        'stopsignal' => 'SIGTERM',
+        'stopwaitsecs' => 605,
+        'stopasgroup' => true,
+        'killasgroup' => true,
     ],
 ];
