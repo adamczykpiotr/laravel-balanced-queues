@@ -74,15 +74,17 @@ php artisan queue:run-balanced
 |------------------------------------|------------------------|-----------------------------------------------|
 | `onHighCpuUsageQueue`              | CPU_HIGH               | Large file processing ~MB/GB                  |
 | `onMediumCpuUsageQueue`            | CPU_MEDIUM             | PDF generation, smaller file parsing (~KB/MB) |
+| `onLowCpuUsageQueue`               | CPU_LOW                | Quick background queries                      |
 | `onHighNetworkRequestUsageQueue`   | NETWORK_HIGH_BANDWIDTH | Large file downloads (~ >10MB)                |
 | `onHighNetworkBandwidthUsageQueue` | NETWORK_HIGH_REQUESTS  | API calls, webhooks                           |
+| `onFilesystemQueue`                | FILESYSTEM             | Filesystem operations (duh!)                  |
 
 ## How It Works
 
-By default, `CPU_HIGH` usage assumes 100% CPU utilisation for a single job and 25% for `CPU_MEDIUM`.
+By default, `CPU_HIGH` usage assumes 100-50% CPU utilisation for a single job, ~50-25% for `CPU_MEDIUM` and ~10-20% for `CPU_LOW`.
 Jobs on `NETWORK_HIGH_BANDWIDTH` are best suited for downloading large files that completely saturate network bandwidth
 whereas `NETWORK_HIGH_REQUESTS` are in most cases are bottleneck by neither network nor cpu and are offloaded on a queue
-simply to improve UX.
+simply to improve UX. `FILESYSTEM` jobs are assumed to be bottlenecked by disk I/O.
 
 If the default configuration doesn't fully utilize your machine, adjust the following default configuration in
 `config/balanced-queues.php`:
@@ -97,9 +99,13 @@ return [
         JobWorkloadType::DEFAULT->value => 1,
 
         JobWorkloadType::CPU_HIGH->value => $CPU_CORES,
-        JobWorkloadType::CPU_MEDIUM->value => 4 * $CPU_CORES,
+        JobWorkloadType::CPU_MEDIUM->value => 2 * $CPU_CORES,
+        JobWorkloadType::CPU_LOW->value => 4 * $CPU_CORES,
+
         JobWorkloadType::NETWORK_HIGH_BANDWIDTH->value => 5,
         JobWorkloadType::NETWORK_HIGH_REQUESTS->value => 50,
+
+        JobWorkloadType::FILESYSTEM->value => 2,
     ],
 ];
 ```
@@ -110,10 +116,12 @@ specific use-case.
 The clue to optimisation is to ensure a *single* queue can fully saturate the machine:
 
 - Dispatching `CPU_CORES` jobs to `CPU_HIGH` queue should result in ~100% CPU usage
-- Dispatching `4` * `CPU_CORES` jobs to `CPU_MEDIUM` queue should result in ~100% CPU usage
+- Dispatching `2` * `CPU_CORES` jobs to `CPU_MEDIUM` queue should result in ~100% CPU usage
+- Dispatching `4` * `CPU_CORES` jobs to `CPU_LOW` queue should result in ~100% CPU usage
 - Dispatching `5` jobs to `NETWORK_HIGH_BANDWIDTH` queue should result in full network saturation
 - Dispatching `50` jobs to `NETWORK_HIGH_REQUESTS` should result in jobs being finished as soon as possible (no real
   bottleneck)
+- Dispatching `2` jobs to `FILESYSTEM` queue should result in full disk I/O saturation
 
 In case more than one queue is fully saturated, OS scheduler will balance processes CPU time accordingly.
 

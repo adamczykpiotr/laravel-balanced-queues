@@ -14,6 +14,11 @@ trait HasBalancedQueues
         return $this->onQueue(JobWorkloadType::DEFAULT->value);
     }
 
+    public function onFilesystemQueue(): static
+    {
+        return $this->onQueue(JobWorkloadType::FILESYSTEM->value);
+    }
+
     public function onHighCpuUsageQueue(): static
     {
         return $this->onQueue(JobWorkloadType::CPU_HIGH->value);
@@ -22,6 +27,11 @@ trait HasBalancedQueues
     public function onMediumCpuUsageQueue(): static
     {
         return $this->onQueue(JobWorkloadType::CPU_MEDIUM->value);
+    }
+
+    public function onLowCpuUsageQueue(): static
+    {
+        return $this->onQueue(JobWorkloadType::CPU_LOW->value);
     }
 
     public function onHighNetworkRequestUsageQueue(): static
