@@ -2,8 +2,8 @@
 
 namespace AdamczykPiotr\LaravelBalancedQueues\Enums;
 
-enum JobWorkloadType: string
-{
+enum JobWorkloadType: string {
+
     case DEFAULT = 'default';
 
     case FILESYSTEM = 'filesystem';
