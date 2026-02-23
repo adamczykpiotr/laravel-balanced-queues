@@ -2,6 +2,7 @@
 
 namespace AdamczykPiotr\LaravelBalancedQueues;
 
+use AdamczykPiotr\LaravelBalancedQueues\Commands\ClearBalancedQueuesCommand;
 use AdamczykPiotr\LaravelBalancedQueues\Commands\RunBalancedQueuesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -18,6 +19,9 @@ class LaravelBalancedQueuesServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-balanced-queues')
             ->hasConfigFile()
-            ->hasCommand(RunBalancedQueuesCommand::class);
+            ->hasCommands([
+                ClearBalancedQueuesCommand::class,
+                RunBalancedQueuesCommand::class,
+            ]);
     }
 }
