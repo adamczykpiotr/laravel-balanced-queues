@@ -172,6 +172,21 @@ Customize the generated Supervisor configuration:
 ],
 ```
 
+### Signal Handling for Graceful Shutdowns
+
+The package includes signal handling configuration for graceful shutdowns, especially useful in dockerized/orchestrated environments:
+
+```php
+'supervisor' => [
+    'stopsignal' => 'SIGTERM',     // Signal used to stop processes
+    'stopwaitsecs' => 605,         // Time to wait for graceful shutdown (set higher than longest job)
+    'stopasgroup' => true,         // Send stop signal to whole process group
+    'killasgroup' => true,         // Ensure all processes in group receive the signal
+],
+```
+
+Set `stopwaitsecs` to a value greater than your longest job duration (worker timeout value or slightly higher) to ensure jobs complete before being terminated.
+
 ## Commands
 
 ```bash
